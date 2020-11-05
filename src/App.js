@@ -15,7 +15,7 @@ const app = new Clarifai.App({
   apiKey: 'dd7d4cfbcb0648ad887c064c25183f2a'
  });
 
- 
+
 
 const particlesOptions = {
   particles: {
@@ -38,9 +38,37 @@ class App extends Component{
       imgUrl: '',
       box: {},
       route: 'signin',
-      isSignedIn:false
+      isSignedIn:false,
+      user: {
+        id:'',
+        name:'',
+        email:'',
+        entries:0,
+        joined:''
+    }
     }
   }
+  loadUser = (data) => {
+    this.setState(
+      {
+        user:{
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          // password: data.email,
+          entries: data.entries,
+          joined: data.joined  
+         }
+      } 
+    );
+  }
+
+
+  // componentDidMount() {
+  //   fetch('http://localhost:3002/')
+  //   .then(response=> response.json())
+  //   .then(data => console.log(data))
+  // }
 
   calculateFaceLocation = (data) => {
     const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
@@ -93,6 +121,8 @@ class App extends Component{
     }
     return this.state.isSignedIn;
   }
+ // props are basically waht type of power a component have
+ // for eg :- it has onClick power , loadUser power etc etc
 
   render() {
     return(
@@ -109,7 +139,7 @@ class App extends Component{
               <ImageLinkForm onInputChange = {this.onInputChange} onDetectClick = {this.onButtonSubmit}/>
               <FaceRecognition box ={this.state.box}imgUrl = {this.state.input}/> 
             </div> 
-          :(this.state.route ==='signin'?<Signin onRouteChange = {this.onRouteChange }/>: <Register onRouteChange = {this.onRouteChange }/>
+          :(this.state.route ==='signin'?<Signin onRouteChange = {this.onRouteChange }/>: <Register loadUser = {this.loadUser} onRouteChange = {this.onRouteChange }/>
           )  
         }
       
