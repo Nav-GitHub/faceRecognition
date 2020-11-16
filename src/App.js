@@ -90,13 +90,33 @@ class App extends Component{
     this.setState({input: event.target.value});
   }
 
-  onButtonSubmit = () => {
+  onPictureSubmit = () => {
     this.setState({imgUrl:this.state.input});
     app.models
     .predict(
       Clarifai.FACE_DETECT_MODEL, 
       this.state.input)
-      .then((response)=> {this.displayFaceBox(this.calculateFaceLocation(response))})
+      .then((response)=> 
+      {
+        if (response) {
+          fetch('http://localhost:3002/image', {
+           method:'put',
+           headers: {'Content-Type':'application/json'},
+           body: JSON.stringify(
+               {    id: this.state.user.id
+                }
+            )
+       }).then(response => response.json())
+       .then(count => {this.setState(
+        Object.assign(this.state.user, {entries: count})
+        //it will change the whole object to update one key and value we will use above
+        // {user: {
+        //   entries: count
+        // }}
+       )})
+          
+        }
+        this.displayFaceBox(this.calculateFaceLocation(response))})
       .catch(err => console.log(err));// shorthand using Es6
     
   }
@@ -135,11 +155,11 @@ class App extends Component{
           this.state.route === 'home'
           ? <div>
               <Logo />
-              <Rank />
-              <ImageLinkForm onInputChange = {this.onInputChange} onDetectClick = {this.onButtonSubmit}/>
+              <Rank name={this.state.user.name} entries={this.state.user.entries}/> 
+              <ImageLinkForm onInputChange = {this.onInputChange} onDetectClick = {this.onPictureSubmit}/>
               <FaceRecognition box ={this.state.box}imgUrl = {this.state.input}/> 
             </div> 
-          :(this.state.route ==='signin'?<Signin onRouteChange = {this.onRouteChange }/>: <Register loadUser = {this.loadUser} onRouteChange = {this.onRouteChange }/>
+          :(this.state.route ==='signin'?<Signin loadUser ={this.loadUser} onRouteChange = {this.onRouteChange }/>: <Register loadUser = {this.loadUser} onRouteChange = {this.onRouteChange }/>
           )  
         }
       
